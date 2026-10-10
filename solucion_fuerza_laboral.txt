@@ -1,0 +1,172 @@
+=====================================================================================
+     INVESTIGACIÓN DE OPERACIONES - PROGRAMACIÓN DINÁMICA DETERMINÍSTICA
+            MODELO DE TAMAÑO DE LA FUERZA DE TRABAJO (WORKFORCE SIZE)
+=====================================================================================
+
+1. PARÁMETROS INICIALES Y CONFIGURACIÓN DEL MODELO:
+-------------------------------------------------------------------------------------
+  * Horizonte de planificación: 5 semanas.
+  * Requerimientos semanales (b_t):
+      - Semana 1: 5 trabajadores
+      - Semana 2: 7 trabajadores
+      - Semana 3: 8 trabajadores
+      - Semana 4: 4 trabajadores
+      - Semana 5: 6 trabajadores
+
+  * Fuerza de trabajo inicial (x_0): 0 trabajadores
+  * Costo por mano de obra excedente: $300.00 / trabajador / semana
+  * Costo de contratación:
+      - Costo fijo de contratación: $400.00
+      - Costo variable por trabajador contratado: $200.00
+      - Fórmula: C_contratación = $400 + $200*(x_i - x_{i-1}) si x_i > x_{i-1}, 0 e.o.c.
+  * Costo de despido / reducción de personal: $0.00 (sin costo según formulación estándar)
+
+  * Formulación Recursiva de Bellman:
+      f_i(x_{i-1}) = min { C_exceso(x_i - b_i) + C_contratación(x_i - x_{i-1}) + f_{i+1}(x_i) }
+      sujeto a: x_i >= b_i (para todo i = 1, ..., 5)
+      Condición de frontera: f_6(x_5) = 0
+
+=====================================================================================
+2. DESGLOSE DETALLADO ETAPA POR ETAPA (CÁLCULOS DE PROGRAMACIÓN DINÁMICA):
+=====================================================================================
+Nota: El proceso se calcula por inducción hacia atrás (de la Semana 5 a la Semana 1).
+
+-------------------------------------------------------------------------------------
+ >>> ETAPA 5 (SEMANA 5) | Requerimiento mínimo b_5 = 6 trabajadores
+-------------------------------------------------------------------------------------
+  Detalle de cálculos por cada estado de entrada (x_{i-1}) y alternativas (x_i):
+
+  x_{i-1} |  x_i  | Exc  | Cont  |  C_Exc($)  | C_Cont($)  | f_{i+1}($)  |  Total($)  | Óptimo? 
+  ----------------------------------------------------------------------------------------------
+     4    |   6   |  0   |   2   |    0.0     |   800.0    |     0.0     |   800.0    |  *** SI 
+     4    |   7   |  1   |   3   |   300.0    |   1000.0   |     0.0     |   1300.0   |         
+     4    |   8   |  2   |   4   |   600.0    |   1200.0   |     0.0     |   1800.0   |         
+  ..............................................................................................
+     5    |   6   |  0   |   1   |    0.0     |   600.0    |     0.0     |   600.0    |  *** SI 
+     5    |   7   |  1   |   2   |   300.0    |   800.0    |     0.0     |   1100.0   |         
+     5    |   8   |  2   |   3   |   600.0    |   1000.0   |     0.0     |   1600.0   |         
+  ..............................................................................................
+     6    |   6   |  0   |   0   |    0.0     |    0.0     |     0.0     |    0.0     |  *** SI 
+     6    |   7   |  1   |   1   |   300.0    |   600.0    |     0.0     |   900.0    |         
+     6    |   8   |  2   |   2   |   600.0    |   800.0    |     0.0     |   1400.0   |         
+  ..............................................................................................
+     7    |   6   |  0   |   0   |    0.0     |    0.0     |     0.0     |    0.0     |  *** SI 
+     7    |   7   |  1   |   0   |   300.0    |    0.0     |     0.0     |   300.0    |         
+     7    |   8   |  2   |   1   |   600.0    |   600.0    |     0.0     |   1200.0   |         
+  ..............................................................................................
+     8    |   6   |  0   |   0   |    0.0     |    0.0     |     0.0     |    0.0     |  *** SI 
+     8    |   7   |  1   |   0   |   300.0    |    0.0     |     0.0     |   300.0    |         
+     8    |   8   |  2   |   0   |   600.0    |    0.0     |     0.0     |   600.0    |         
+  ..............................................................................................
+
+  >> Resumen de Decisiones Óptimas para la Etapa 5:
+     - Para estado x_4 =  4 trabajadores: Decisión óptima x_5* = 6 | Costo mínimo f_5(4) = $800.00
+     - Para estado x_4 =  5 trabajadores: Decisión óptima x_5* = 6 | Costo mínimo f_5(5) = $600.00
+     - Para estado x_4 =  6 trabajadores: Decisión óptima x_5* = 6 | Costo mínimo f_5(6) = $0.00
+     - Para estado x_4 =  7 trabajadores: Decisión óptima x_5* = 6 | Costo mínimo f_5(7) = $0.00
+     - Para estado x_4 =  8 trabajadores: Decisión óptima x_5* = 6 | Costo mínimo f_5(8) = $0.00
+
+-------------------------------------------------------------------------------------
+ >>> ETAPA 4 (SEMANA 4) | Requerimiento mínimo b_4 = 4 trabajadores
+-------------------------------------------------------------------------------------
+  Detalle de cálculos por cada estado de entrada (x_{i-1}) y alternativas (x_i):
+
+  x_{i-1} |  x_i  | Exc  | Cont  |  C_Exc($)  | C_Cont($)  | f_{i+1}($)  |  Total($)  | Óptimo? 
+  ----------------------------------------------------------------------------------------------
+     8    |   4   |  0   |   0   |    0.0     |    0.0     |    800.0    |   800.0    |         
+     8    |   5   |  1   |   0   |   300.0    |    0.0     |    600.0    |   900.0    |         
+     8    |   6   |  2   |   0   |   600.0    |    0.0     |     0.0     |   600.0    |  *** SI 
+     8    |   7   |  3   |   0   |   900.0    |    0.0     |     0.0     |   900.0    |         
+     8    |   8   |  4   |   0   |   1200.0   |    0.0     |     0.0     |   1200.0   |         
+  ..............................................................................................
+
+  >> Resumen de Decisiones Óptimas para la Etapa 4:
+     - Para estado x_3 =  8 trabajadores: Decisión óptima x_4* = 6 | Costo mínimo f_4(8) = $600.00
+
+-------------------------------------------------------------------------------------
+ >>> ETAPA 3 (SEMANA 3) | Requerimiento mínimo b_3 = 8 trabajadores
+-------------------------------------------------------------------------------------
+  Detalle de cálculos por cada estado de entrada (x_{i-1}) y alternativas (x_i):
+
+  x_{i-1} |  x_i  | Exc  | Cont  |  C_Exc($)  | C_Cont($)  | f_{i+1}($)  |  Total($)  | Óptimo? 
+  ----------------------------------------------------------------------------------------------
+     7    |   8   |  0   |   1   |    0.0     |   600.0    |    600.0    |   1200.0   |  *** SI 
+  ..............................................................................................
+     8    |   8   |  0   |   0   |    0.0     |    0.0     |    600.0    |   600.0    |  *** SI 
+  ..............................................................................................
+
+  >> Resumen de Decisiones Óptimas para la Etapa 3:
+     - Para estado x_2 =  7 trabajadores: Decisión óptima x_3* = 8 | Costo mínimo f_3(7) = $1,200.00
+     - Para estado x_2 =  8 trabajadores: Decisión óptima x_3* = 8 | Costo mínimo f_3(8) = $600.00
+
+-------------------------------------------------------------------------------------
+ >>> ETAPA 2 (SEMANA 2) | Requerimiento mínimo b_2 = 7 trabajadores
+-------------------------------------------------------------------------------------
+  Detalle de cálculos por cada estado de entrada (x_{i-1}) y alternativas (x_i):
+
+  x_{i-1} |  x_i  | Exc  | Cont  |  C_Exc($)  | C_Cont($)  | f_{i+1}($)  |  Total($)  | Óptimo? 
+  ----------------------------------------------------------------------------------------------
+     5    |   7   |  0   |   2   |    0.0     |   800.0    |   1200.0    |   2000.0   |         
+     5    |   8   |  1   |   3   |   300.0    |   1000.0   |    600.0    |   1900.0   |  *** SI 
+  ..............................................................................................
+     6    |   7   |  0   |   1   |    0.0     |   600.0    |   1200.0    |   1800.0   |         
+     6    |   8   |  1   |   2   |   300.0    |   800.0    |    600.0    |   1700.0   |  *** SI 
+  ..............................................................................................
+     7    |   7   |  0   |   0   |    0.0     |    0.0     |   1200.0    |   1200.0   |  *** SI 
+     7    |   8   |  1   |   1   |   300.0    |   600.0    |    600.0    |   1500.0   |         
+  ..............................................................................................
+     8    |   7   |  0   |   0   |    0.0     |    0.0     |   1200.0    |   1200.0   |         
+     8    |   8   |  1   |   0   |   300.0    |    0.0     |    600.0    |   900.0    |  *** SI 
+  ..............................................................................................
+
+  >> Resumen de Decisiones Óptimas para la Etapa 2:
+     - Para estado x_1 =  5 trabajadores: Decisión óptima x_2* = 8 | Costo mínimo f_2(5) = $1,900.00
+     - Para estado x_1 =  6 trabajadores: Decisión óptima x_2* = 8 | Costo mínimo f_2(6) = $1,700.00
+     - Para estado x_1 =  7 trabajadores: Decisión óptima x_2* = 7 | Costo mínimo f_2(7) = $1,200.00
+     - Para estado x_1 =  8 trabajadores: Decisión óptima x_2* = 8 | Costo mínimo f_2(8) = $900.00
+
+-------------------------------------------------------------------------------------
+ >>> ETAPA 1 (SEMANA 1) | Requerimiento mínimo b_1 = 5 trabajadores
+-------------------------------------------------------------------------------------
+  Detalle de cálculos por cada estado de entrada (x_{i-1}) y alternativas (x_i):
+
+  x_{i-1} |  x_i  | Exc  | Cont  |  C_Exc($)  | C_Cont($)  | f_{i+1}($)  |  Total($)  | Óptimo? 
+  ----------------------------------------------------------------------------------------------
+     0    |   5   |  0   |   5   |    0.0     |   1400.0   |   1900.0    |   3300.0   |  *** SI 
+     0    |   6   |  1   |   6   |   300.0    |   1600.0   |   1700.0    |   3600.0   |         
+     0    |   7   |  2   |   7   |   600.0    |   1800.0   |   1200.0    |   3600.0   |         
+     0    |   8   |  3   |   8   |   900.0    |   2000.0   |    900.0    |   3800.0   |         
+  ..............................................................................................
+
+  >> Resumen de Decisiones Óptimas para la Etapa 1:
+     - Para estado x_0 =  0 trabajadores: Decisión óptima x_1* = 5 | Costo mínimo f_1(0) = $3,300.00
+
+=====================================================================================
+3. RUTA U OPERACIÓN ÓPTIMA GLOBAL (POLÍTICA DE PLANIFICACIÓN)
+=====================================================================================
+Avanzando desde el estado inicial x_0 = 0 mediante las decisiones óptimas obtenidas:
+
+ Semana  | Inicio  | Requerido | Fuerza Opt | Contrat | Despido | Exceso | C.Contrat  |  C.Exceso  |  C.Semana  | Acumulado 
+----------------------------------------------------------------------------------------------------------------------------
+    1    |    0    |     5     |     5      |    5    |    0    |   0    | $ 1400.00  | $  0.00    | $ 1400.00  | $ 1400.00 
+    2    |    5    |     7     |     8      |    3    |    0    |   1    | $ 1000.00  | $ 300.00   | $ 1300.00  | $ 2700.00 
+    3    |    8    |     8     |     8      |    0    |    0    |   0    | $  0.00    | $  0.00    | $  0.00    | $ 2700.00 
+    4    |    8    |     4     |     6      |    0    |    2    |   2    | $  0.00    | $ 600.00   | $ 600.00   | $ 3300.00 
+    5    |    6    |     6     |     6      |    0    |    0    |   0    | $  0.00    | $  0.00    | $  0.00    | $ 3300.00 
+----------------------------------------------------------------------------------------------------------------------------
+
+  DESGLOSE NARRATIVO DE ACCIONES SEMANALES:
+  * Semana 1: Contar con 5 trabajadores (requeridos: 5). Acción: contratar 5 trabajador(es) (costo: $1,400.00); fuerza laboral exactamente ajustada a la demanda. Costo semanal: $1,400.00.
+  * Semana 2: Contar con 8 trabajadores (requeridos: 7). Acción: contratar 3 trabajador(es) (costo: $1,000.00); mantener 1 trabajador(es) excedente(s) (costo: $300.00). Costo semanal: $1,300.00.
+  * Semana 3: Contar con 8 trabajadores (requeridos: 8). Acción: mantener la misma plantilla (sin contrataciones); fuerza laboral exactamente ajustada a la demanda. Costo semanal: $0.00.
+  * Semana 4: Contar con 6 trabajadores (requeridos: 4). Acción: reducir/despedir 2 trabajador(es) (sin costo); mantener 2 trabajador(es) excedente(s) (costo: $600.00). Costo semanal: $600.00.
+  * Semana 5: Contar con 6 trabajadores (requeridos: 6). Acción: mantener la misma plantilla (sin contrataciones); fuerza laboral exactamente ajustada a la demanda. Costo semanal: $0.00.
+
+=====================================================================================
+4. RESUMEN EJECUTIVO Y COSTO TOTAL MÍNIMO:
+=====================================================================================
+  * Plan Óptimo de Fuerza de Trabajo: [5, 8, 8, 6, 6]
+  * Costo Total Acumulado por Contratación: $2,400.00
+  * Costo Total Acumulado por Exceso de Personal: $900.00
+  * COSTO TOTAL MÍNIMO GLOBAL (Z*): $3,300.00
+=====================================================================================
